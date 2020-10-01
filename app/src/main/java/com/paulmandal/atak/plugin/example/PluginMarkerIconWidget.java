@@ -31,7 +31,7 @@ public class PluginMarkerIconWidget extends MarkerIconWidget implements MapWidge
         LinearLayoutWidget brLayout = root.getLayout(RootLayoutWidget.BOTTOM_RIGHT);
         brLayout.addWidget(this);
 
-        String imageUri = "android.resource://com.paulmandal.atak.plugin.example/" + R.drawable.ic_green_circle;
+        String imageUri = "android.resource://com.paulmandal.atak.plugin.example/" + R.drawable.ic_map_overlay;
 
         Icon.Builder builder = new Icon.Builder();
         builder.setAnchor(0, 0);
