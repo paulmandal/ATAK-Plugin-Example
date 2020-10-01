@@ -1,6 +1,7 @@
 package com.paulmandal.atak.plugin.example;
 
 import android.content.Context;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -13,10 +14,14 @@ public class OutboundMessageHandler implements CommsMapComponent.PreSendProcesso
     private static final String TAG = OutboundMessageHandler.class.getSimpleName();
 
     private CommsMapComponent commsMapComponent;
+    private Handler uiThreadHandler;
     private Context atakContext;
 
-    public OutboundMessageHandler(CommsMapComponent commsMapComponent, Context atakContext) {
+    public OutboundMessageHandler(CommsMapComponent commsMapComponent,
+                                  Handler uiThreadHandler,
+                                  Context atakContext) {
         this.commsMapComponent = commsMapComponent;
+        this.uiThreadHandler = uiThreadHandler;
         this.atakContext = atakContext;
 
         commsMapComponent.registerPreSendProcessor(this);
@@ -28,10 +33,9 @@ public class OutboundMessageHandler implements CommsMapComponent.PreSendProcesso
 
     @Override
     public void processCotEvent(CotEvent cotEvent, String[] toUIDs) {
-        String msg = "processCotEvent: " + cotEvent + " UIDs: " + Arrays.toString(toUIDs);
-        Log.d(TAG, msg);
+        Log.d(TAG, "processCotEvent: " + cotEvent + " UIDs: " + Arrays.toString(toUIDs));
 
         // Use atakContext for Toasts, pluginContext for getting resources (e.g. strings)
-        Toast.makeText(this.atakContext, msg, Toast.LENGTH_SHORT).show();
+        uiThreadHandler.post(() -> Toast.makeText(this.atakContext, "Outbound CoT, type: " + cotEvent.getType(), Toast.LENGTH_SHORT).show());
     }
 }

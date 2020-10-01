@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.os.Handler;
+import android.os.Looper;
 
 import com.atakmap.android.maps.MapComponent;
 import com.atakmap.android.maps.MapView;
@@ -53,7 +55,9 @@ public class PluginLifecycle implements Lifecycle {
         // AtakContext should be used for Toasts
         Context atakContext = mapView.getContext();
 
-        this.outboundMessageHandler = new OutboundMessageHandler(CommsMapComponent.getInstance(), atakContext);
+        Handler uiThreadHandler = new Handler(Looper.getMainLooper());
+
+        this.outboundMessageHandler = new OutboundMessageHandler(CommsMapComponent.getInstance(), uiThreadHandler, atakContext);
         this.inboundMessageHandler = new InboundMessageHandler(pluginVersion);
 
         overlays.add(new PluginMapComponent());

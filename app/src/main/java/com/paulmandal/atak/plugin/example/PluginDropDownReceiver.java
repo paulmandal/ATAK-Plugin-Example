@@ -4,10 +4,12 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.view.View;
+import android.widget.ArrayAdapter;
 
 import com.atak.plugins.impl.PluginLayoutInflater;
 import com.atakmap.android.dropdown.DropDown;
 import com.atakmap.android.dropdown.DropDownReceiver;
+import com.atakmap.android.gui.PluginSpinner;
 import com.atakmap.android.maps.MapView;
 
 public class PluginDropDownReceiver extends DropDownReceiver implements DropDown.OnStateListener {
@@ -21,6 +23,17 @@ public class PluginDropDownReceiver extends DropDownReceiver implements DropDown
         super(mapView);
 
         this.pluginView = PluginLayoutInflater.inflate(pluginContext, R.layout.main_layout, null);
+
+        String[] items = {
+                "One",
+                "Two",
+                "Three"
+        };
+
+        PluginSpinner pluginSpinner = pluginView.findViewById(R.id.plugin_spinner);
+        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(pluginContext, android.R.layout.simple_spinner_item, items);
+        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        pluginSpinner.setAdapter(spinnerArrayAdapter);
     }
 
     public void disposeImpl() {

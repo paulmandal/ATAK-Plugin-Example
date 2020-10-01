@@ -7,5 +7,11 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingBottom="16dp"
         android:text="@string/hello_world" />
+
+    <com.atakmap.android.gui.PluginSpinner
+        android:id="@+id/plugin_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 </LinearLayout>

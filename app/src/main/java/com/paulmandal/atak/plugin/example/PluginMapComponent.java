@@ -16,8 +16,6 @@ public class PluginMapComponent  extends DropDownMapComponent {
         pluginContext.setTheme(R.style.ATAKPluginTheme);
         super.onCreate(pluginContext, intent, mapView);
 
-        Context atakContext = mapView.getContext();
-
         PluginDropDownReceiver pluginDropDownReceiver = new PluginDropDownReceiver(mapView, pluginContext);
 
         AtakBroadcast.DocumentedIntentFilter ddFilter = new AtakBroadcast.DocumentedIntentFilter();
