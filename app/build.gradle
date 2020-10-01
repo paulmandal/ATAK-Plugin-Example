@@ -1,0 +1,174 @@
+apply plugin: 'com.android.application'
+
+def PLUGIN_VERSION = "0.0.1"
+def ATAK_VERSION = "4.1.0"
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.1"
+
+    defaultConfig {
+        applicationId "com.paulmandal.atak.plugin.example"
+        minSdkVersion 21
+        targetSdkVersion 30
+
+        ndk {
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86"
+        }
+    }
+
+    // NOTE: If you need to build for other flavors copy the civ {} block and replace "civ" and "CIV" with the flavor (e.g. mil/MIL)
+    flavorDimensions "application"
+    productFlavors {
+        civ {
+            dimension "application"
+            manifestPlaceholders = [atakApiVersion: "com.atakmap.app@" + ATAK_VERSION + ".CIV"]
+        }
+    }
+
+
+    sourceSets {
+        main {
+            setProperty("archivesBaseName", "ATAK-Plugin-" + rootProject.name + "-" + PLUGIN_VERSION + "-" + getVersionName() + "-" + ATAK_VERSION)
+            defaultConfig.versionCode = getVersionCode()
+            defaultConfig.versionName = PLUGIN_VERSION + " (" + getVersionName() + ") - [" + ATAK_VERSION + "]"
+        }
+//        test {
+//            proto {
+//                srcDir 'src/test/protocolbuffers'
+//            }
+//            java.srcDirs 'src/test/java'
+//        }
+//        // Move the tests to tests/java, tests/res, etc...
+//        //instrumentTest.setRoot('tests')
+//
+//        // Move the build types to build-types/<type>
+//        // For instance, build-types/debug/java, build-types/debug/AndroidManifest.xml, ...
+//        // This moves them out of them default location under src/<type>/... which would
+//        // conflict with src/ being used by the main source set.
+//        // Adding new build types or product flavors should be accompanied
+//        // by a similar customization.
+//        debug.setRoot('build-types/debug')
+//        release.setRoot('build-types/release')
+
+    }
+
+//    packagingOptions {
+//        exclude 'META-INF/INDEX.LIST'
+//        exclude 'META-INF/androidx.localbroadcastmanager_localbroadcastmanager.version'
+//    }
+
+    lintOptions {
+        checkReleaseBuilds true
+        // Or, if you prefer, you can continue to check for errors in release builds,
+        // but continue the build even when errors are found:
+        abortOnError true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    signingConfigs {
+        debug {
+            storeFile file("/path/to/your/keystore")
+            storePassword ""
+            keyAlias ""
+            keyPassword ""
+        }
+
+        release {
+            storeFile file("/path/to/your/keystore")
+            storePassword ""
+            keyAlias ""
+            keyPassword ""
+        }
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+        }
+
+        release {
+            def f = new File("$project.projectDir/../../AndroidTacticalAssaultKit-CIV/atak/ATAK/app/build/outputs/mapping/release/mapping.txt")
+            if (f.exists()) {
+                System.setProperty("atak.proguard.mapping", "../../AndroidTacticalAssaultKit-CIV/atak/ATAK/app/build/outputs/mapping/release/mapping.txt")
+            } else {
+                println("WARNING: no mapping file exists, obfuscating just the plugin to work with the development core")
+                file("$project.projectDir/build").mkdir()
+                file("$project.projectDir/build/blank-mapping.txt").text = ""
+                System.setProperty("atak.proguard.mapping", "./build/blank-mapping.txt")
+            }
+
+            minifyEnabled true
+            proguardFile 'proguard-gradle.txt'
+            signingConfig signingConfigs.release
+        }
+    }
+}
+
+// Attempt to get a suitable version name for the plugin based on
+// either a git or svn repository
+def getVersionName() {
+    try {
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'rev-parse', '--short=8', 'HEAD'
+            standardOutput = stdout
+        }
+        def describe = stdout.toString().trim()
+        println("versionName[git]: $describe")
+        return describe
+    } catch (Exception ignored) {
+        println("error occured, using revision of 1")
+        return 1
+    }
+}
+
+
+// Attempt to get a suitable version code for the plugin based on
+// either a git or svn repository
+def getVersionCode() {
+    try {
+        new ByteArrayOutputStream().withStream { os ->
+            exec {
+                executable = 'git'
+                args = ['show', '-s', '--format=%ct']
+                standardOutput = os
+                ignoreExitValue = true
+            }
+
+            def outputAsString = os.toString()
+            ext.revision = "$outputAsString".toInteger()
+
+            println("version[git]: $revision")
+        }
+    } catch (Exception ignored) {
+        println("error occured, using revision of 1")
+        ext.revision = 1
+    }
+
+    return revision
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+
+    // ATAK Plugin library
+    def atakLib = new File("$project.projectDir/../../AndroidTacticalAssaultKit-CIV/atak/ATAK/app/build/libs/4.1.0.CIV/main.jar")
+    if (atakLib.exists()) {
+        compileOnly fileTree(dir: '../../AndroidTacticalAssaultKit-CIV/atak/ATAK/app/build/libs/4.1.0.CIV/main.jar', include: '*.jar')
+    } else {
+        def msg = "ERROR: This plugin's directory must be in the same directory as AndroidTacticalAssaultKit-CIV, or you will need to manually update the dependencies in app/build.gradle to point to the ATAK plugin library (main.jar)"
+        println(msg)
+        throw new Exception(msg)
+    }
+
+    testImplementation 'junit:junit:4.13'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+}

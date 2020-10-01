@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ATAK Plugin Example</string>
+    <string name="app_desc">ATAK Plugin Example Description</string>
+    <string name="hello_world">Hello World</string>
+</resources>
